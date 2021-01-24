@@ -67,7 +67,10 @@
         (if (seq exprs)
           (recur
            (rest exprs)
-           (eval-form ctx (first exprs)))
+           #?(:clj  (eval-form ctx (first exprs))
+              :cljs (if (instance? js/Promise ret)
+                      (.then ret #(eval-form ctx (first exprs)))
+                      (eval-form ctx (first exprs)))))
           ret))
       (when (or (not (:uberscript ctx))
                 (= 'ns (first form))
@@ -112,8 +115,10 @@
           (let [expr (p/parse-next ctx reader)]
             (if (utils/kw-identical? p/eof expr)
               ret
-              (let [ret (eval-form ctx expr)]
-                (recur ret)))))))))
+              (recur #?(:clj  (eval-form ctx expr)
+                        :cljs (if (instance? js/Promise ret)
+                                (.then ret #(eval-form ctx expr))
+                                (eval-form ctx expr)))))))))))
 
 #?(:clj
    (when (System/getenv "SCI_STATS")

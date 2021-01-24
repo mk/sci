@@ -894,6 +894,16 @@
                          {:file "foo.clj"
                           :source "(ns foo) (defn foo-fn [] 1)"})})))))
 
+#?(:cljs
+   (deftest load-fn-async-test
+     (when-not tu/native?
+       (is (= 1 (tu/eval* "
+(let [ns 'foo]
+  (require ns))
+(foo/foo-fn)" {:load-fn (constantly
+                         (.resolve js/Promise {:file "foo.clj"
+                                               :source "(ns foo) (defn foo-fn [] 1)"}))}))))))
+
 (deftest reload-test
   (when-not tu/native?
     (is (= "hello\nhello\nhello\n"
@@ -1119,4 +1129,3 @@
   (test-difference "foo" "[10 10]" 0 10)
   (test-difference "rand" #(rand) 0 10)
   )
- 
