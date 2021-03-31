@@ -854,6 +854,10 @@
 (deftest defonce-test
   (is (= 1 (eval* "(defonce x 1) (defonce x 2) x"))))
 
+(deftest metadata-test
+  (is (= {:m true} (eval* "(meta ^:m {:foo :bar})")))
+  (is (= {:m true} (eval* "(meta ^:m {:foo {}})"))))
+
 (deftest metadata-on-var-test
   (is (= 'x (eval* "(def x) (:name (meta #'x))")))
   (is (= 'foo (eval* "(ns foo) (declare x) (def x 2) (ns-name (:ns (meta #'x)))"))))
@@ -1150,4 +1154,3 @@
   (test-difference "foo" "[10 10]" 0 10)
   (test-difference "rand" #(rand) 0 10)
   )
- 
